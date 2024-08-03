@@ -32,6 +32,8 @@ struct Worm
 	const int numConstrains = numParticles - 1;
 	std::vector<ElasticDistance> constrains;
 
+	Color outlineColor = { 255, 255, 255, 255 };
+	Color faceColor = { 255, 255, 255, 255 };
 private:
 	std::vector<Vec2> moveToPoints;
 	const float speed = 1000.f;

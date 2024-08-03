@@ -42,6 +42,7 @@ Worm::Worm(SDL_Renderer* renderer)
 	GenerateBodyPoints();
 }
 
+
 void Worm::ResolveConstrains()
 {
 	for (const ElasticDistance& c : constrains)
@@ -151,22 +152,22 @@ void Worm::DrawFace(SDL_Renderer* renderer)
 
 	std::vector<Vec2> smile = GenerateRoundedEnds(headPos, 10.f, thetas[0]);
 	std::vector<SDL_Point> p = Vec2ToSDLPoints(smile);
-	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+	SDL_SetRenderDrawColor(renderer, faceColor.r, faceColor.g, faceColor.b, faceColor.a);
 	SDL_RenderDrawLines(renderer, &p[0], p.size());
+	SDL_RenderDrawLine(renderer, p[0].x, p[0].y, p[p.size() - 1].x, p[p.size() - 1].y);
 }
 
 void Worm::DrawBody(SDL_Renderer* renderer)
 {
 	/// Side lines
 	GenerateBodyPoints();
-	// line from left points - green
+	SDL_SetRenderDrawColor(renderer, outlineColor.r, outlineColor.g, outlineColor.b, outlineColor.a);
+	// line from left points
 	std::vector<SDL_Point> sdl_points_left = Vec2ToSDLPoints(points_l);
-	SDL_SetRenderDrawColor(renderer, 0, 150, 50, 255);
 	SDL_RenderDrawLines(renderer, &sdl_points_left[0], sdl_points_left.size());
 
-	// line from right points - red
+	// line from right points
 	std::vector<SDL_Point> sdl_points_right = Vec2ToSDLPoints(points_r);
-	SDL_SetRenderDrawColor(renderer, 150, 0, 50, 255);
 	SDL_RenderDrawLines(renderer, &sdl_points_right[0], sdl_points_right.size());
 
 
@@ -200,7 +201,7 @@ void Worm::DrawDebugSidePoints(SDL_Renderer* renderer)
 		Vec2 pl = points_l[i];
 		Vec2 pr = points_r[i];
 		Vec2 pf = points_f[i];
-		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+		SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
 		SDL_RenderDrawPoint(renderer, pl.x, pl.y);
 		SDL_RenderDrawPoint(renderer, pr.x, pr.y);
 		SDL_RenderDrawPoint(renderer, pf.x, pf.y);

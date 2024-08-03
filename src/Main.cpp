@@ -7,20 +7,27 @@
 #include "Vec2.h"
 #include "Utils.h"
 #include "Worm.h"
+#include "MyUI.h"
+
 
 const int SCREEN_WIDTH = 1280;
 const int SCREEN_HEIGHT = 720;
+
 
 int main(int argc, char* args[])
 {
 	int result = SDL_Init(SDL_INIT_VIDEO);
 	assert(result == 0 && "SDL could not initialize!");
-	
-	SDL_Window* window = SDL_CreateWindow("Basic SDL", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
+
+	SDL_Window* window = SDL_CreateWindow("Lizardsss", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
 	assert(window != nullptr && "Window could not be created!");
 
-	SDL_Renderer* renderer =  SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+	SDL_Renderer* renderer =  SDL_CreateRenderer(window, 0, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 	assert(renderer != nullptr && "Renderer could not be created!");
+
+
+	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "2");
+	MyUI::Init(window, renderer);
 
 	Worm worm(renderer);
 
@@ -55,7 +62,11 @@ int main(int argc, char* args[])
 			{
 				if (event.type == SDL_QUIT)
 					quit = true;
+
+				MyUI::ProcessEvent(event);
 			}
+
+			MyUI::StartFrame();
 
 			int mouseX;
 			int mouseY;
@@ -91,6 +102,8 @@ int main(int argc, char* args[])
 			//	DrawPoint(renderer, p);
 			//}
 
+			MyUI::EndFrame(renderer);
+
 			SDL_SetRenderDrawColor(renderer, 55, 55, 100, 255);
 			SDL_RenderPresent(renderer);
 			SDL_RenderClear(renderer);
@@ -100,6 +113,7 @@ int main(int argc, char* args[])
 		}
 	}
 
+	MyUI::Shutdown();
 	SDL_DestroyWindow(window);
 	SDL_Quit();
 	return 0;

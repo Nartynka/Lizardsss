@@ -76,7 +76,7 @@ inline void DrawPoint(SDL_Renderer* renderer, Vec2 center, SDL_Color color)
 
 inline void DrawPoint(SDL_Renderer* renderer, Point p)
 {
-	SDL_Rect dsrect = { (int)p.pos.x-(p.size.x/2), (int)p.pos.y- (p.size.y / 2), (int)p.size.x, (int)p.size.y };
+	SDL_Rect dsrect = { (int)(p.pos.x-(p.size.x/2)), (int)(p.pos.y- (p.size.y / 2)), (int)p.size.x, (int)p.size.y };
 	SDL_RenderCopy(renderer, p.text, nullptr, &dsrect);
 }
 
@@ -91,7 +91,7 @@ inline Point CreatePoint(SDL_Renderer* renderer, Vec2 center)
 
 inline void DrawDebugParticle(SDL_Renderer* renderer, Vec2 center, float radius, SDL_Color color)
 {
-	DrawCircle(renderer, center, radius, color);
+	DrawCircle(renderer, center, (int)radius, color);
 	DrawPoint(renderer, center, color);
 }
 

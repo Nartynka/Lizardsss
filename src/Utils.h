@@ -112,3 +112,10 @@ inline std::vector<SDL_Point> Vec2ToSDLPoints(std::vector<Vec2> points)
 	}
 	return sdl_points;
 }
+
+inline int RandomInRange(int a, int b)
+{
+	int random = a + (rand() % (b - a));
+	printf("%i\n", random);
+	return random;
+}

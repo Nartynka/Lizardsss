@@ -1,5 +1,5 @@
 #include "Worm.h"
-
+#include <cassert>
 
 Worm::Worm(SDL_Renderer* renderer)
 {
@@ -18,6 +18,8 @@ Worm::Worm(SDL_Renderer* renderer)
 	}
 
 	particles[0].mass = 0.f;
+
+	// only for debug
 	particles[0].color = { 200, 50, 150 };
 
 	for (int i = 0; i < numConstrains; ++i)
@@ -42,6 +44,67 @@ Worm::Worm(SDL_Renderer* renderer)
 	GenerateBodyPoints();
 }
 
+
+Worm::Worm(SDL_Renderer* renderer, WormOptions::Options options)
+{
+	Vec2 origin = { 50.f, 100.f };
+	numParticles = options.numParticles;
+	numConstrains = numParticles - 1;
+	outlineColor = options.outlineColor;
+	faceColor = options.faceColor;
+	faceType = options.faceType;
+	eyesType = options.eyesType;
+
+	for (int i = 0; i < numParticles; ++i)
+	{
+		Particle p;
+		p.pos = origin;
+		p.radius = options.radius;
+		origin -= Vec2(p.radius, 0.f);
+		p.vel = Vec2(0.f);
+		particles.push_back(p);
+	}
+
+	particles[0].mass = 0.f;
+
+	// only for debug
+	particles[0].color = { 200, 50, 150 };
+
+	for (int i = 0; i < numConstrains; ++i)
+	{
+		ElasticDistance c;
+
+		c.idx_a = i;
+		c.idx_b = i + 1;
+
+		if (options.hasAutoDistance)
+		{
+			Vec2 diff = particles[i].pos - particles[i + 1].pos;
+			c.distance = length(diff);
+		}
+		else
+		{
+			c.distance = options.distance;
+		}
+
+		constrains.push_back(c);
+	}
+
+	SDL_Surface* eye_surf = IMG_Load(options.GetEyesPath(eyesType));
+	SDL_Texture* eye_text = SDL_CreateTextureFromSurface(renderer, eye_surf);
+	eyes.first = { eye_text, {0}, { eye_surf->h / 2, eye_surf->w / 2} };
+	eyes.second = { eye_text, {0}, { eye_surf->h / 2, eye_surf->w / 2} };
+	SDL_FreeSurface(eye_surf);
+
+
+	GenerateBodyPoints();
+}
+
+Worm::~Worm()
+{
+	printf("destructor\n");
+	SDL_DestroyTexture(eyes.first.text);
+}
 
 void Worm::ResolveConstrains()
 {
@@ -129,38 +192,11 @@ float normalize_angle(float angle)
 	return angle;
 }
 
-void Worm::DrawFace(SDL_Renderer* renderer)
-{
-	const Vec2 headPos = particles[0].pos;
-	float r = particles[0].radius;
-
-	float leftAngle = normalize_angle(thetas[0] + M_PI / 2);
-	float rightAngle = normalize_angle(thetas[0] - M_PI / 2);
-
-	float leftX = headPos.x - r * cosf(leftAngle);
-	float leftY = headPos.y - r * sinf(leftAngle);
-
-	float rightX = headPos.x - r * cosf(rightAngle);
-	float rightY = headPos.y - r * sinf(rightAngle);
-
-	eyes.first.pos = { leftX, leftY };
-	eyes.second.pos = { rightX, rightY };
-
-	DrawPoint(renderer, eyes.first);
-	DrawPoint(renderer, eyes.second);
-
-
-	std::vector<Vec2> smile = GenerateRoundedEnds(headPos, 10.f, thetas[0]);
-	std::vector<SDL_Point> p = Vec2ToSDLPoints(smile);
-	SDL_SetRenderDrawColor(renderer, faceColor.r, faceColor.g, faceColor.b, faceColor.a);
-	SDL_RenderDrawLines(renderer, &p[0], p.size());
-	SDL_RenderDrawLine(renderer, p[0].x, p[0].y, p[p.size() - 1].x, p[p.size() - 1].y);
-}
-
 void Worm::DrawBody(SDL_Renderer* renderer)
 {
 	/// Side lines
 	GenerateBodyPoints();
+	//SDL_SetRenderDrawColor(renderer, outlineColor.r, outlineColor.g, outlineColor.b, outlineColor.a);
 	SDL_SetRenderDrawColor(renderer, outlineColor.r, outlineColor.g, outlineColor.b, outlineColor.a);
 	// line from left points
 	std::vector<SDL_Point> sdl_points_left = Vec2ToSDLPoints(points_l);
@@ -180,8 +216,49 @@ void Worm::DrawBody(SDL_Renderer* renderer)
 	SDL_RenderDrawLines(renderer, &sdl_back_points[0], sdl_back_points.size());
 
 	/// Eyes & smile :D
-	DrawFace(renderer);
+	if(hasFace)
+		DrawFace(renderer);
+	if (hasEyes)
+		DrawEyes(renderer);
+}
 
+void Worm::DrawEyes(SDL_Renderer* renderer)
+{
+	const Vec2& headPos = particles[0].pos;
+	float r = particles[0].radius;
+
+	float leftAngle = normalize_angle(thetas[0] + M_PI / 2);
+	float rightAngle = normalize_angle(thetas[0] - M_PI / 2);
+
+	float leftX = headPos.x - r * cosf(leftAngle);
+	float leftY = headPos.y - r * sinf(leftAngle);
+
+	float rightX = headPos.x - r * cosf(rightAngle);
+	float rightY = headPos.y - r * sinf(rightAngle);
+
+	eyes.first.pos = { leftX, leftY };
+	eyes.second.pos = { rightX, rightY };
+
+	DrawPoint(renderer, eyes.first);
+	DrawPoint(renderer, eyes.second);
+	DrawPoint(renderer, {rightX, rightY}, {255, 255, 255, 255});
+	DrawPoint(renderer, { leftX, leftY }, { 255, 255, 255, 255 });
+}
+
+void Worm::DrawFace(SDL_Renderer* renderer)
+{
+	//const Vec2& headPos = particles[0].pos;
+	const Vec2& headPos = points_f[0];
+	int direction = faceType == WormOptions::Sad ? -1 : 1;
+
+	std::vector<Vec2> smile = GenerateRoundedEnds(headPos, 15.f, thetas[0], direction);
+	std::vector<SDL_Point> p = Vec2ToSDLPoints(smile);
+
+	SDL_SetRenderDrawColor(renderer, faceColor.r, faceColor.g, faceColor.b, faceColor.a);
+	SDL_RenderDrawLines(renderer, &p[0], p.size());
+
+	if(faceType == WormOptions::WideSimle)
+		SDL_RenderDrawLine(renderer, p[0].x, p[0].y, p[p.size() - 1].x, p[p.size() - 1].y);
 }
 
 
@@ -237,4 +314,22 @@ void Worm::MoveTowards(const double dt)
 		head.vel = dir * speed * (float)dt;
 		head.pos += head.vel;
 	}
+}
+
+void Worm::MoveRandom(const float dt)
+{
+	Vec2 target = { 100, 100 };
+	Particle& head = particles[0];
+
+	Vec2 diff = { target.x - head.pos.x, target.y - head.pos.y };
+	float distance = length(diff);
+
+	if (distance <= 2.f)
+	{
+		target = { RandomInRange(-100, 1180), RandomInRange(-100, 820) };
+	}
+
+		Vec2 dir = normalize(diff);
+		head.vel = dir * 100 * dt;
+		head.pos += head.vel;
 }

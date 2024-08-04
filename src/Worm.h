@@ -3,6 +3,7 @@
 #include <vector>
 #include "Vec2.h"
 #include "Utils.h"
+#include "MyUI.h"
 
 struct Particle
 {
@@ -11,7 +12,7 @@ struct Particle
 	Vec2 vel;
 	float radius = 30.f;
 	float mass = 1.f;
-	Color color = { 55, 150, 100, 255 };
+	Color color = { 55, 150, 100, 255 }; // only for debug
 };
 
 struct ElasticDistance
@@ -26,21 +27,29 @@ struct ElasticDistance
 
 struct Worm
 {
+	int numParticles = 128;
 	std::vector<Particle> particles;
-	const int numParticles = 128;
 
-	const int numConstrains = numParticles - 1;
+	int numConstrains = numParticles - 1;
 	std::vector<ElasticDistance> constrains;
 
-	Color outlineColor = { 255, 255, 255, 255 };
-	Color faceColor = { 255, 255, 255, 255 };
+	SDL_Color outlineColor = { 255, 255, 255, 255 };
+	SDL_Color faceColor = { 255, 255, 255, 255 };
+
+	WormOptions::Face faceType;
+	WormOptions::Eyes eyesType;
+
+	bool hasEyes = true;
+	bool hasFace = true;
 private:
 	std::vector<Vec2> moveToPoints;
 	const float speed = 1000.f;
 
+	// only for debug
 	std::vector<Vec2> points_r;
 	std::vector<Vec2> points_l;
 	std::vector<Vec2> points_f;
+	// only first and last is used - rest is only for debug
 	std::vector<float> thetas;
 
 	void GenerateBodyPoints();
@@ -49,14 +58,17 @@ private:
 
 	std::pair<Point, Point> eyes;
 
+	void DrawEyes(SDL_Renderer* renderer);
 	void DrawFace(SDL_Renderer* renderer);
 public:
 	Worm(SDL_Renderer* renderer);
+	Worm(SDL_Renderer* renderer, WormOptions::Options options);
+
+	~Worm();
 
 	void ResolveConstrains();
 
 	void DrawBody(SDL_Renderer* renderer);
-
 
 	void DrawDebugBody(SDL_Renderer* renderer);
 	void DrawDebugSidePoints(SDL_Renderer* renderer);
@@ -64,4 +76,5 @@ public:
 	void AddMoveToPoint(Vec2 pos);
 	void MoveTowards(const double dt);
 
+	void MoveRandom(const float dt);
 };

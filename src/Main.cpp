@@ -8,6 +8,7 @@
 #include "Utils.h"
 #include "Worm.h"
 #include "MyUI.h"
+#include <memory>
 
 
 const int SCREEN_WIDTH = 1280;
@@ -29,7 +30,9 @@ int main(int argc, char* args[])
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "2");
 	MyUI::Init(window, renderer);
 
-	Worm worm(renderer);
+	Worm playerWorm(renderer);
+
+	std::vector<std::shared_ptr<Worm>> worms;
 
 	const float fixedDeltaTime = 1.f / 60.f; // 60 FPS
 	float lastTime = 0.f;
@@ -38,16 +41,6 @@ int main(int argc, char* args[])
 
 	bool quit = false;
 	SDL_Event event;
-
-	std::vector<Point> points;
-	const int numPoints = 25;
-	const float dist = 25.f;
-
-
-	for (int i = 0; i < numPoints; ++i)
-	{
-		points.push_back(CreatePoint(renderer, { 10*i, 100 }));
-	}
 
 
 	while (!quit)
@@ -68,39 +61,35 @@ int main(int argc, char* args[])
 
 			MyUI::StartFrame();
 
-			int mouseX;
-			int mouseY;
+			WormOptions::Options options;
+			MyUI::DrawMenu(&options, [renderer, &options, &worms]() {auto newWorm = std::make_shared<Worm>(renderer, options); worms.emplace_back(newWorm); });
+
+			{
+				playerWorm.outlineColor = options.outlineColor;
+				playerWorm.hasEyes = options.hasEyes;
+				playerWorm.hasFace = options.hasFace;
+				playerWorm.faceColor = options.faceColor;
+				playerWorm.faceType = options.faceType;
+				playerWorm.eyesType = options.eyesType;
+			}
+
+			int mouseX = 500;
+			int mouseY = 100;
 			SDL_GetMouseState(&mouseX, &mouseY);
 			Vec2 mousePos = { mouseX, mouseY };
 
-			//points[0].pos = {mousePos.x - points[0].size.x/2, mousePos.y - points[0].size.y / 2 };
+			playerWorm.particles[0].pos = mousePos;
 
-			//for (int i = 1; i < numPoints; ++i)
-			//{
-			//	Point& p1 = points[i];
-			//	Point p2 = points[i - 1];
-			//	p1.pos = ConstrainDistance(p1.pos, p2.pos, dist);
+			playerWorm.ResolveConstrains();
+			playerWorm.DrawBody(renderer);
 
-			//	float of_x = p1.size.x / 2;
-			//	float of_y = p1.size.y / 2;
+			for (const auto& w : worms)
+			{
+				w->ResolveConstrains();
+				w->DrawBody(renderer);
+				//w->MoveRandom(fixedDeltaTime);
+			}
 
-			//	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-			//	SDL_RenderDrawLine(renderer, p1.pos.x + of_x, p1.pos.y + of_y, p2.pos.x + of_x, p2.pos.y + of_y);
-			//}
-
-			worm.particles[0].pos = mousePos;
-			// resolve constrains
-			worm.ResolveConstrains();
-
-			/// DRAW EVERYTHING
-			worm.DrawBody(renderer);
-
-			// draw points starting from the last point so that first points are drawn on the last points
-			//for (int i = numPoints-1; i >= 0; --i)
-			//{
-			//	Point p = points[i];
-			//	DrawPoint(renderer, p);
-			//}
 
 			MyUI::EndFrame(renderer);
 

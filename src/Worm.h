@@ -43,7 +43,8 @@ struct Worm
 	bool hasFace = true;
 private:
 	std::vector<Vec2> moveToPoints;
-	const float speed = 1000.f;
+	const float speed = 120.f;
+	Vec2 target = {0.f, 0.f};
 
 	// only for debug
 	std::vector<Vec2> points_r;
@@ -54,7 +55,7 @@ private:
 
 	void GenerateBodyPoints();
 	std::pair<Vec2, Vec2> GenerateSidesPoints(const Vec2& center, float radius, float angle);
-	std::vector<Vec2> GenerateRoundedEnds(const Vec2& center, float radius, float startAngle, int direction = 1);
+	std::vector<Vec2> GenerateRoundedLines(const Vec2& center, float radius, float startAngle, float endAngle = M_PI, int direction = 1);
 
 	std::pair<Point, Point> eyes;
 
@@ -76,5 +77,5 @@ public:
 	void AddMoveToPoint(Vec2 pos);
 	void MoveTowards(const double dt);
 
-	void MoveRandom(const float dt);
+	void MoveToRandom(const float dt);
 };

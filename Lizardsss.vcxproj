@@ -21,7 +21,6 @@
   <ItemGroup>
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\MyUI.cpp" />
-    <ClCompile Include="src\Test.cpp" />
     <ClCompile Include="src\Utils.h" />
     <ClCompile Include="src\Worm.cpp" />
     <ClCompile Include="ThirdParty\imgui\backends\imgui_impl_sdl2.cpp" />

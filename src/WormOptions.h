@@ -5,6 +5,7 @@
 namespace WormOptions
 {
 	static const char* FaceStrings[] = { "Smile :)", "Wide Smile :D", "No Smile :(" };
+	static const char* EyesStrings[] = { "Default" };
 	enum Face : int
 	{
 		Smile,
@@ -15,7 +16,8 @@ namespace WormOptions
 
 	enum Eyes
 	{
-		Default
+		Default,
+		NumEyes,
 	};
 
 	struct Options
@@ -29,11 +31,12 @@ namespace WormOptions
 		bool hasFace = false;
 		Face faceType = Face::Smile;
 
+		// this options are not yet changeable from ui
 		int radius = 30;
-		int numParticles = 128;
+		int numParticles = 64;
 
 		bool hasAutoDistance = false;
-		float distance = 10.f;
+		float distance = 5.f;
 
 		const char* GetEyesPath(Eyes type)
 		{
@@ -47,13 +50,24 @@ namespace WormOptions
 			}
 		}
 
-		Face MatchStringToEnum(const char* string)
+		Face MatchFaceStringToEnum(const char* string)
 		{
 			for (int i = 0; i < NumFaces; ++i)
 			{
 				if (FaceStrings[i] == string)
 				{
 					return Face(i);
+				}
+			}
+		}
+
+		Eyes MatchEyesStringToEnum(const char* string)
+		{
+			for (int i = 0; i < NumEyes; ++i)
+			{
+				if (EyesStrings[i] == string)
+				{
+					return Eyes(i);
 				}
 			}
 		}

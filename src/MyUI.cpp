@@ -38,8 +38,8 @@ void MyUI::StartFrame()
 
 void MyUI::DrawMenu(WormOptions::Options* outOptions, std::function<void()> callback)
 {
-	static ImVec4 outlineColor = ImVec4(114.0f / 255.0f, 144.0f / 255.0f, 154.0f / 255.0f, 200.0f / 255.0f);
-	static ImVec4 faceColor = ImVec4(114.0f / 255.0f, 144.0f / 255.0f, 154.0f / 255.0f, 200.0f / 255.0f);
+	static ImVec4 outlineColor = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
+	static ImVec4 faceColor = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
 
 	static bool eyes = false;
 	static bool face = false;
@@ -50,22 +50,22 @@ void MyUI::DrawMenu(WormOptions::Options* outOptions, std::function<void()> call
 	ImGui::Text("Outline Color:");
 	ImGui::SameLine();
 	ImGui::ColorEdit3("Outline Color", (float*)&outlineColor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_NoDragDrop);
+	
 	ImGui::Checkbox("Eyes", &eyes);
-
+	const char* eyes_types[] = { "Default" };
+	static int eyes_current_idx = -1; // Here we store our selection data as an index.
 	if (eyes)
 	{
-		const char* items[] = { "Default" };
-		static int item_current_idx = -1; // Here we store our selection data as an index.
 		// Pass in the preview value visible before opening the combo (it could technically be different contents or not pulled from items[])
-		const char* combo_preview_value = item_current_idx > -1 ? items[item_current_idx] : "Choose eyes";
+		const char* combo_preview_value = eyes_current_idx > -1 ? eyes_types[eyes_current_idx] : "Choose eyes";
 
 		if (ImGui::BeginCombo("##1", combo_preview_value))
 		{
-			for (int n = 0; n < IM_ARRAYSIZE(items); n++)
+			for (int n = 0; n < IM_ARRAYSIZE(eyes_types); n++)
 			{
-				const bool is_selected = (item_current_idx == n);
-				if (ImGui::Selectable(items[n], is_selected))
-					item_current_idx = n;
+				const bool is_selected = (eyes_current_idx == n);
+				if (ImGui::Selectable(eyes_types[n], is_selected))
+					eyes_current_idx = n;
 
 				// Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
 				if (is_selected)
@@ -76,21 +76,20 @@ void MyUI::DrawMenu(WormOptions::Options* outOptions, std::function<void()> call
 	}
 
 	ImGui::Checkbox("Face", &face);
-	const char* items[] = { "Smile :)", "Wide Smile :D", "No Smile :("};
-	static int item_current_idx = -1; // Here we store our selection data as an index.
+	const char* face_types[] = { "Smile :)", "Wide Smile :D", "No Smile :("};
+	static int face_current_idx = -1; // Here we store our selection data as an index.
 	if (face)
 	{
-
 		// Pass in the preview value visible before opening the combo (it could technically be different contents or not pulled from items[])
-		const char* combo_preview_value = item_current_idx > -1 ?  items[item_current_idx] : "Choose face";
+		const char* combo_preview_value = face_current_idx > -1 ?  face_types[face_current_idx] : "Choose face";
 
 		if (ImGui::BeginCombo("##2", combo_preview_value))
 		{
-			for (int n = 0; n < IM_ARRAYSIZE(items); n++)
+			for (int n = 0; n < IM_ARRAYSIZE(face_types); n++)
 			{
-				const bool is_selected = (item_current_idx == n);
-				if (ImGui::Selectable(items[n], is_selected))
-					item_current_idx = n;
+				const bool is_selected = (face_current_idx == n);
+				if (ImGui::Selectable(face_types[n], is_selected))
+					face_current_idx = n;
 
 				// Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
 				if (is_selected)
@@ -105,15 +104,17 @@ void MyUI::DrawMenu(WormOptions::Options* outOptions, std::function<void()> call
 
 	}
 
-	// add sliders for numParticles, distance, radius and hasAutoDistance
+	// @TODO: add sliders for numParticles, distance, radius and hasAutoDistance
 
 
 	outOptions->hasEyes = eyes;
 	outOptions->hasFace = face;
 	outOptions->outlineColor = { (Uint8)(outlineColor.x * 255.0f), (Uint8)(outlineColor.y * 255.0f), (Uint8)(outlineColor.z * 255.0f), 255 };
 	outOptions->faceColor = { (Uint8)(faceColor.x * 255.0f), (Uint8)(faceColor.y * 255.0f), (Uint8)(faceColor.z * 255.0f), 255 };
-	if(eyes && item_current_idx > -1)
-		outOptions->faceType = outOptions->MatchStringToEnum(items[item_current_idx]);
+	if (face && face_current_idx > -1)
+		outOptions->faceType = outOptions->MatchFaceStringToEnum(face_types[face_current_idx]);
+	if (eyes && eyes_current_idx > -1)
+		outOptions->eyesType = outOptions->MatchEyesStringToEnum(eyes_types[eyes_current_idx]);
 
 	ImGui::SeparatorText("Magic xD");
 
@@ -123,6 +124,7 @@ void MyUI::DrawMenu(WormOptions::Options* outOptions, std::function<void()> call
 	}
 
 	ImGui::End();
+
 }
 
 void MyUI::EndFrame(SDL_Renderer* renderer)

@@ -68,6 +68,16 @@ inline void DrawCircle(SDL_Renderer* renderer, Vec2 center, int radius, SDL_Colo
 	}
 }
 
+inline float Rad2Deg(float radians)
+{
+	return radians * 180 / M_PI;
+}
+
+inline float Deg2Rad(float degrees)
+{
+	return degrees * M_PI / 180;
+}
+
 inline void DrawPoint(SDL_Renderer* renderer, Vec2 center, SDL_Color color)
 {
 	SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
@@ -115,7 +125,5 @@ inline std::vector<SDL_Point> Vec2ToSDLPoints(std::vector<Vec2> points)
 
 inline int RandomInRange(int a, int b)
 {
-	int random = a + (rand() % (b - a));
-	printf("%i\n", random);
-	return random;
+	return a + (rand() % (b - a));
 }

@@ -54,6 +54,8 @@ Worm::Worm(SDL_Renderer* renderer, WormOptions::Options options)
 	faceColor = options.faceColor;
 	faceType = options.faceType;
 	eyesType = options.eyesType;
+	hasFace = options.hasFace;
+	hasEyes = options.hasEyes;
 
 	for (int i = 0; i < numParticles; ++i)
 	{
@@ -168,12 +170,13 @@ std::pair<Vec2, Vec2> Worm::GenerateSidesPoints(const Vec2& center, float radius
 	return { {left_x, left_y}, {right_x, right_y} };
 }
 
-
-std::vector<Vec2> Worm::GenerateRoundedEnds(const Vec2& center, float radius, float startAngle, int direction)
+// Generates points along a rounded line around the center
+// default is half circle (180 deg. or pi) pointing outside the center. Like a simile :) or closing bracket ")"
+std::vector<Vec2> Worm::GenerateRoundedLines(const Vec2& center, float radius, float startAngle, float endAngle, int direction)
 {
 	std::vector<Vec2> points;
 	int segments = 10; // Number of segments to divide the semi-circle - more segments, more smooth circle
-	float angleStep = M_PI / segments; // Step size for each segment, each segment will have even step
+	float angleStep = endAngle / segments; // Step size for each segment, each segment will have even step
 
 	for (int i = 0; i <= segments; ++i)
 	{
@@ -208,8 +211,8 @@ void Worm::DrawBody(SDL_Renderer* renderer)
 
 
 	/// Rounded Ends
-	std::vector<Vec2> front_circle = GenerateRoundedEnds(particles[0].pos, particles[0].radius, thetas[0]);
-	std::vector<Vec2> back_circle = GenerateRoundedEnds(particles[numParticles - 1].pos, particles[numParticles - 1].radius, thetas[thetas.size() - 1], -1);
+	std::vector<Vec2> front_circle = GenerateRoundedLines(particles[0].pos, particles[0].radius, thetas[0]);
+	std::vector<Vec2> back_circle = GenerateRoundedLines(particles[numParticles - 1].pos, particles[numParticles - 1].radius, thetas[thetas.size() - 1], M_PI, -1);
 	std::vector<SDL_Point> sdl_front_points = Vec2ToSDLPoints(front_circle);
 	std::vector<SDL_Point> sdl_back_points = Vec2ToSDLPoints(back_circle);
 	SDL_RenderDrawLines(renderer, &sdl_front_points[0], sdl_front_points.size());
@@ -227,6 +230,7 @@ void Worm::DrawEyes(SDL_Renderer* renderer)
 	const Vec2& headPos = particles[0].pos;
 	float r = particles[0].radius;
 
+	// @TODO: do i need to normalize the angle?
 	float leftAngle = normalize_angle(thetas[0] + M_PI / 2);
 	float rightAngle = normalize_angle(thetas[0] - M_PI / 2);
 
@@ -241,17 +245,34 @@ void Worm::DrawEyes(SDL_Renderer* renderer)
 
 	DrawPoint(renderer, eyes.first);
 	DrawPoint(renderer, eyes.second);
-	DrawPoint(renderer, {rightX, rightY}, {255, 255, 255, 255});
+	DrawPoint(renderer, { rightX, rightY }, { 255, 255, 255, 255 });
 	DrawPoint(renderer, { leftX, leftY }, { 255, 255, 255, 255 });
 }
 
 void Worm::DrawFace(SDL_Renderer* renderer)
 {
-	//const Vec2& headPos = particles[0].pos;
-	const Vec2& headPos = points_f[0];
-	int direction = faceType == WormOptions::Sad ? -1 : 1;
+	Vec2 headPos = particles[0].pos;
 
-	std::vector<Vec2> smile = GenerateRoundedEnds(headPos, 15.f, thetas[0], direction);
+	int direction = faceType == WormOptions::Sad ? -1 : 1;
+	
+	float endAngle = Deg2Rad(120.f);
+	float startAngle = thetas[0]+(M_PI - endAngle)/2; // (180 - 120) / 2
+	float radius = particles[0].radius - 25.f;
+
+	if (faceType == WormOptions::Sad)
+	{
+		radius = particles[0].radius - 5.f;
+	}
+	if (faceType == WormOptions::WideSimle)
+	{
+		startAngle = thetas[0];
+		endAngle = M_PI;
+	}
+
+	float x = headPos.x - radius * cosf(thetas[0]);
+	float y = headPos.y - radius * sinf(thetas[0]);
+
+	std::vector<Vec2> smile = GenerateRoundedLines({x, y}, 15.f, startAngle, endAngle, direction);
 	std::vector<SDL_Point> p = Vec2ToSDLPoints(smile);
 
 	SDL_SetRenderDrawColor(renderer, faceColor.r, faceColor.g, faceColor.b, faceColor.a);
@@ -259,6 +280,10 @@ void Worm::DrawFace(SDL_Renderer* renderer)
 
 	if(faceType == WormOptions::WideSimle)
 		SDL_RenderDrawLine(renderer, p[0].x, p[0].y, p[p.size() - 1].x, p[p.size() - 1].y);
+
+	// printf("%i\n", faceType);
+	//SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+	//SDL_RenderDrawPoint(renderer, x, y);
 }
 
 
@@ -316,20 +341,27 @@ void Worm::MoveTowards(const double dt)
 	}
 }
 
-void Worm::MoveRandom(const float dt)
+void Worm::MoveToRandom(const float dt)
 {
-	Vec2 target = { 100, 100 };
 	Particle& head = particles[0];
 
 	Vec2 diff = { target.x - head.pos.x, target.y - head.pos.y };
 	float distance = length(diff);
 
-	if (distance <= 2.f)
+	if (distance <= 2.f || target == Vec2(0.f, 0.f))
 	{
-		target = { RandomInRange(-100, 1180), RandomInRange(-100, 820) };
-	}
+		Vec2 prevTarget = target;
+		target = { RandomInRange(-10, 1090), RandomInRange(-10, 730) };
 
+		while (abs(target.x - prevTarget.x) < 100.f || abs(target.y - prevTarget.y) < 100.f)
+		{
+			target = { RandomInRange(-10, 1090), RandomInRange(-10, 730) };
+		}
+	}
+	else 
+	{
 		Vec2 dir = normalize(diff);
-		head.vel = dir * 100 * dt;
+		head.vel = dir * speed * dt;
 		head.pos += head.vel;
+	}
 }

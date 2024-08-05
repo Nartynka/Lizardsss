@@ -60,6 +60,11 @@ struct Vec2
 		return { x + b.x, y + b.y };
 	}
 
+	bool operator==(Vec2 b) const
+	{
+		return x == b.x && y == b.y;
+	}
+
 	//bool operator<(Vec2 b) const
 	//{
 	//	return x < b.x && y < b.y;

@@ -62,8 +62,10 @@ int main(int argc, char* args[])
 			MyUI::StartFrame();
 
 			WormOptions::Options options;
+			
 			MyUI::DrawMenu(&options, [renderer, &options, &worms]() {auto newWorm = std::make_shared<Worm>(renderer, options); worms.emplace_back(newWorm); });
-
+			
+			// only for preview
 			{
 				playerWorm.outlineColor = options.outlineColor;
 				playerWorm.hasEyes = options.hasEyes;
@@ -87,7 +89,7 @@ int main(int argc, char* args[])
 			{
 				w->ResolveConstrains();
 				w->DrawBody(renderer);
-				//w->MoveRandom(fixedDeltaTime);
+				w->MoveToRandom(fixedDeltaTime);
 			}
 
 

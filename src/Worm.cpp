@@ -281,7 +281,6 @@ void Worm::DrawFace(SDL_Renderer* renderer)
 	if(faceType == WormOptions::WideSimle)
 		SDL_RenderDrawLine(renderer, p[0].x, p[0].y, p[p.size() - 1].x, p[p.size() - 1].y);
 
-	// printf("%i\n", faceType);
 	//SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
 	//SDL_RenderDrawPoint(renderer, x, y);
 }

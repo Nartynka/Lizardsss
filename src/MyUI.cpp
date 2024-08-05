@@ -15,6 +15,10 @@ void MyUI::Init(SDL_Window* window, SDL_Renderer* renderer)
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // Docking
 	io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
+	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(8.f, 6.f));
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(10.f, 8.f));
+	ImGui::PushStyleVar(ImGuiStyleVar_ItemInnerSpacing, ImVec2(6.f, 4.f));
+
 	// Setup Platform/Renderer backends
 	ImGui_ImplSDL2_InitForSDLRenderer(window, renderer);
 	ImGui_ImplSDLRenderer2_Init(renderer);
@@ -44,8 +48,8 @@ void MyUI::DrawMenu(WormOptions::Options* outOptions, std::function<void()> call
 	static bool eyes = false;
 	static bool face = false;
 
-	ImGui::Begin("Create a Worm!");
-	ImGui::SeparatorText("Options");
+	ImGui::Begin("Create a Worm!", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+	ImGui::SeparatorText("Appearance");
 
 	ImGui::Text("Outline Color:");
 	ImGui::SameLine();
@@ -104,7 +108,27 @@ void MyUI::DrawMenu(WormOptions::Options* outOptions, std::function<void()> call
 
 	}
 
-	// @TODO: add sliders for numParticles, distance, radius and hasAutoDistance
+	ImGui::SeparatorText("Size");
+	static bool autoDistance = outOptions->hasAutoDistance;
+	static float distance = outOptions->distance;
+	static float radius = outOptions->radius;
+	static unsigned int numParticles = outOptions->numParticles;
+
+	static float f_min = 1.f;
+	static float f_max = 100.f;
+	static int i_min = 2;
+	static int i_max = 1024;
+	ImGui::PushItemWidth(60.f);
+	//ImGuiSliderFlags_AlwaysClamp
+	int dragFlags = ImGuiSliderFlags_AlwaysClamp;
+	ImGui::DragScalar("Number of particles", ImGuiDataType_U32, &numParticles, 0.02f, &i_min, &i_max, "%u", dragFlags);
+	ImGui::DragScalar("Radius of particles", ImGuiDataType_Float, &radius, 1.f, &f_min, &f_max, "%.2f", dragFlags);
+	ImGui::Checkbox("Should auto calculate distance?", &autoDistance);
+	if (!autoDistance)
+	{
+		ImGui::DragScalar("Distance between particles", ImGuiDataType_Float, &distance, 1.f, &f_min, &f_max, "%.2f", dragFlags);
+	}
+
 
 
 	outOptions->hasEyes = eyes;
@@ -116,9 +140,18 @@ void MyUI::DrawMenu(WormOptions::Options* outOptions, std::function<void()> call
 	if (eyes && eyes_current_idx > -1)
 		outOptions->eyesType = outOptions->MatchEyesStringToEnum(eyes_types[eyes_current_idx]);
 
-	ImGui::SeparatorText("Magic xD");
+	outOptions->hasAutoDistance = autoDistance;
+	if (autoDistance)
+	{
+		outOptions->distance = distance;
+	}
+	outOptions->distance = distance;
+	outOptions->numParticles = numParticles;
+	outOptions->radius = radius;
 
-	if (ImGui::Button("Create!", { -FLT_MIN, 0.0f }))
+
+	ImGui::SeparatorText("Magic xD");
+	if (ImGui::Button("Create!", { -FLT_MIN, 30.0f }))
 	{
 		callback();
 	}

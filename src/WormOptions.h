@@ -31,7 +31,6 @@ namespace WormOptions
 		bool hasFace = false;
 		Face faceType = Face::Smile;
 
-		// this options are not yet changeable from ui
 		int radius = 30;
 		int numParticles = 64;
 

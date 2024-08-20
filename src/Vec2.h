@@ -65,6 +65,17 @@ struct Vec2
 		return x == b.x && y == b.y;
 	}
 
+	float length()
+	{
+		return (float)sqrt(x * x + y * y);
+	}
+
+	Vec2 normalize()
+	{
+		float len = length();
+		return { x / len, y / len };
+	}
+
 	//bool operator<(Vec2 b) const
 	//{
 	//	return x < b.x && y < b.y;

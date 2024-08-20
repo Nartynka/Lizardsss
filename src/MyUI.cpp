@@ -119,7 +119,7 @@ void MyUI::DrawMenu(WormOptions::Options* outOptions, std::function<void()> call
 	static int i_min = 2;
 	static int i_max = 1024;
 	ImGui::PushItemWidth(60.f);
-	//ImGuiSliderFlags_AlwaysClamp
+
 	int dragFlags = ImGuiSliderFlags_AlwaysClamp;
 	ImGui::DragScalar("Number of particles", ImGuiDataType_U32, &numParticles, 0.02f, &i_min, &i_max, "%u", dragFlags);
 	ImGui::DragScalar("Radius of particles", ImGuiDataType_Float, &radius, 1.f, &f_min, &f_max, "%.2f", dragFlags);

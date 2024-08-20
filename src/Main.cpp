@@ -27,7 +27,7 @@ int main(int argc, char* args[])
 	assert(renderer != nullptr && "Renderer could not be created!");
 
 
-	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "2");
+	//SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "2");
 	MyUI::Init(window, renderer);
 
 	Worm playerWorm(renderer);
@@ -42,6 +42,15 @@ int main(int argc, char* args[])
 	bool quit = false;
 	SDL_Event event;
 
+	float thighLenght = 80.f;
+	Vec2 hip = { 400, 300 };
+
+	float shinLenght = 60.f;
+	Vec2 knee = { hip.x, hip.y+thighLenght};
+
+	Vec2 foot = { knee.x, knee.y + shinLenght };
+
+	Vec2 target = { 700, 200 };
 
 	while (!quit)
 	{
@@ -63,24 +72,52 @@ int main(int argc, char* args[])
 
 			WormOptions::Options options;
 			
-			MyUI::DrawMenu(&options, [renderer, &options, &worms]() {auto newWorm = std::make_shared<Worm>(renderer, options); worms.emplace_back(newWorm); });
+			//MyUI::DrawMenu(&options, [renderer, &options, &worms]() {auto newWorm = std::make_shared<Worm>(renderer, options); worms.emplace_back(newWorm); });
 			
 			// only for preview
-			{
-				playerWorm.outlineColor = options.outlineColor;
-				playerWorm.hasEyes = options.hasEyes;
-				playerWorm.hasFace = options.hasFace;
-				playerWorm.faceColor = options.faceColor;
-				playerWorm.faceType = options.faceType;
-				playerWorm.eyesType = options.eyesType;
-			}
+			//{
+			//	playerWorm.outlineColor = options.outlineColor;
+			//	playerWorm.hasEyes = options.hasEyes;
+			//	playerWorm.hasFace = options.hasFace;
+			//	playerWorm.faceColor = options.faceColor;
+			//	playerWorm.faceType = options.faceType;
+			//	playerWorm.eyesType = options.eyesType;
+			//}
 
-			int mouseX = 500;
-			int mouseY = 100;
+			int mouseX, mouseY;
 			SDL_GetMouseState(&mouseX, &mouseY);
 			Vec2 mousePos = { mouseX, mouseY };
+			
+			//playerWorm.particles[0].pos = mousePos;
+			
 
-			playerWorm.particles[0].pos = mousePos;
+			target = mousePos;
+
+			// forward reaching
+			foot = target;
+			knee = foot + (knee - foot).normalize() * shinLenght;
+
+			// backward reaching
+			knee = hip + (knee - hip).normalize() * thighLenght;
+			foot = knee + (foot - knee).normalize() * shinLenght;
+
+
+			// target circle
+			DrawCircle(renderer, target, 10.f, { 255, 255, 255, 255 });
+
+			// hip
+			SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+			DrawCircle(renderer, hip, 10.f, { 255, 0, 0, 255 });
+			DrawLine(renderer, hip, knee);
+
+			// knee
+			SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
+			DrawCircle(renderer, knee, 10.f, { 0, 255, 0, 255 });
+			DrawLine(renderer, knee, foot);
+
+			// foot
+			DrawCircle(renderer, foot, 10.f, { 0, 0, 255, 255 });
+			
 
 			playerWorm.ResolveConstrains();
 			playerWorm.DrawBody(renderer);

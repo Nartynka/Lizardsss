@@ -78,19 +78,19 @@ inline float Deg2Rad(float degrees)
 	return degrees * M_PI / 180;
 }
 
-inline void DrawPoint(SDL_Renderer* renderer, Vec2 center, SDL_Color color)
+inline void DrawPoint(SDL_Renderer* renderer, const Vec2& center, SDL_Color color)
 {
 	SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
 	SDL_RenderDrawPoint(renderer, (int)center.x, (int)center.y);
 }
 
-inline void DrawPoint(SDL_Renderer* renderer, Point p)
+inline void DrawPoint(SDL_Renderer* renderer, const Point& p)
 {
 	SDL_Rect dsrect = { (int)(p.pos.x-(p.size.x/2)), (int)(p.pos.y- (p.size.y / 2)), (int)p.size.x, (int)p.size.y };
 	SDL_RenderCopy(renderer, p.text, nullptr, &dsrect);
 }
 
-inline Point CreatePoint(SDL_Renderer* renderer, Vec2 center)
+inline Point CreatePoint(SDL_Renderer* renderer, const Vec2& center)
 {
 	SDL_Surface* d_surf = IMG_Load("res/dot.png");
 	SDL_Texture* d_text = SDL_CreateTextureFromSurface(renderer, d_surf);
@@ -99,13 +99,18 @@ inline Point CreatePoint(SDL_Renderer* renderer, Vec2 center)
 	return p;
 }
 
-inline void DrawDebugParticle(SDL_Renderer* renderer, Vec2 center, float radius, SDL_Color color)
+inline void DrawLine(SDL_Renderer* renderer, const Vec2& start, const Vec2& end)
+{
+	SDL_RenderDrawLine(renderer, start.x, start.y, end.x, end.y);
+}
+
+inline void DrawDebugParticle(SDL_Renderer* renderer, const Vec2& center, float radius, SDL_Color color)
 {
 	DrawCircle(renderer, center, (int)radius, color);
 	DrawPoint(renderer, center, color);
 }
 
-inline Vec2 ConstrainDistance(Vec2 point, Vec2 anchor, float distance) 
+inline Vec2 ConstrainDistance(const Vec2& point, const Vec2& anchor, float distance)
 {
 	Vec2 diff = point - anchor;
 	Vec2 dir = normalize(diff);
@@ -113,7 +118,7 @@ inline Vec2 ConstrainDistance(Vec2 point, Vec2 anchor, float distance)
 	return v + anchor;
 }
 
-inline std::vector<SDL_Point> Vec2ToSDLPoints(std::vector<Vec2> points)
+inline std::vector<SDL_Point> Vec2ToSDLPoints(const std::vector<Vec2>& points)
 {
 	std::vector<SDL_Point> sdl_points;
 	for (const Vec2& point : points)

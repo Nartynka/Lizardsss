@@ -85,20 +85,25 @@ struct Vec2
 	//{
 	//	return x > b.x && y > b.y;
 	//}
+
+	//float dot(const Vec2& a, const Vec2& b)
+	//{
+	//	return a.x * b.x + a.y * b.y;
+	//}
 };
 
 
+inline float dot(const Vec2& a, const Vec2& b)
+{
+	return (a.x * b.x + a.y * b.y);
+}
+
 inline float length(const Vec2& v)
 {
-	return (float)sqrt(v.x * v.x + v.y * v.y);
+	return (float)sqrt(dot(v, v));
 }
 
 inline Vec2 normalize(const Vec2& v)
 {
 	return (v / length(v));
-}
-
-inline float dot(const Vec2& a, const Vec2& b)
-{
-	return (a.x * b.x + a.y * b.y);
 }

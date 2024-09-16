@@ -3,7 +3,7 @@
 
 Worm::Worm(SDL_Renderer* renderer)
 {
-	Vec2 origin = { 50.f, 100.f };
+	Vec2 origin = { 500.f, 100.f };
 	int radius = 30;
 	int x = radius / numParticles;
 	for (int i = 0; i < numParticles; ++i)
@@ -41,13 +41,18 @@ Worm::Worm(SDL_Renderer* renderer)
 	eyes.second = { eye_text, {0}, { eye_surf->h / 2, eye_surf->w / 2} };
 	SDL_FreeSurface(eye_surf);
 
+	for (int i = 0; i < numLegs; ++i)
+	{
+		legs.emplace_back();
+	}
+
 	GenerateBodyPoints();
 }
 
 
 Worm::Worm(SDL_Renderer* renderer, WormOptions::Options options)
 {
-	Vec2 origin = { 50.f, 100.f };
+	Vec2 origin = { 500.f, 100.f };
 	numParticles = options.numParticles;
 	numConstrains = numParticles - 1;
 	outlineColor = options.outlineColor;
@@ -98,14 +103,18 @@ Worm::Worm(SDL_Renderer* renderer, WormOptions::Options options)
 	eyes.second = { eye_text, {0}, { eye_surf->h / 2, eye_surf->w / 2} };
 	SDL_FreeSurface(eye_surf);
 
+	for (int i = 0; i < numLegs; ++i)
+	{
+		legs.emplace_back();
+	}
 
 	GenerateBodyPoints();
 }
 
 Worm::~Worm()
 {
-	printf("destructor\n");
 	SDL_DestroyTexture(eyes.first.text);
+	SDL_DestroyTexture(eyes.second.text);
 }
 
 void Worm::ResolveConstrains()
@@ -158,6 +167,60 @@ void Worm::GenerateBodyPoints()
 }
 
 
+void Worm::MoveLegs(SDL_Renderer* renderer)
+{
+	int spacing = points_l.size() / (numLegs % 2 == 0 ? numLegs : numLegs + 1);
+	int idx = spacing;
+	for (int i = 0; i < numLegs; ++i)
+	{
+		Vec2 dir;
+		if (i % 2 != 0)
+		{
+			legs[i].SetAnchor(points_r[idx]);
+			dir = (points_r[idx] - points_r[idx + 1]).normalize();
+			legs[i].CalculateNextStep(renderer, dir);
+			idx += spacing * 2;
+		}
+		else
+		{
+			//if (idx > points_l.size()-1)
+			//	idx = idx - 15;
+			legs[i].SetAnchor(points_l[idx]);
+			dir = (points_l[idx] - points_l[idx + 1]).normalize();
+			legs[i].CalculateNextStep(renderer, dir, false);
+		}
+
+		legs[i].FABRIK();
+	}
+
+	{
+	//legs[0].SetAnchor(points_l[idx]);
+	//legs[1].SetAnchor(points_r[idx]);
+	//legs[2].SetAnchor(points_l[idx * 3]);
+	//legs[3].SetAnchor(points_r[idx * 3]);
+
+	//Vec2 dir = (points_l[idx] - points_l[idx + 1]).normalize();
+	//legs[0].CalculateNextStep(renderer, dir);
+	//legs[0].FABRIK();
+	//legs[0].Draw(renderer);
+
+	//dir = (points_r[idx] - points_r[idx + 1]).normalize();
+	//legs[1].CalculateNextStep(renderer, dir);
+	//legs[1].FABRIK();
+	//legs[1].Draw(renderer);
+
+	//dir = (points_l[idx * 3] - points_l[idx * 3 + 1]).normalize();
+	//legs[2].CalculateNextStep(renderer, dir);
+	//legs[2].FABRIK();
+	//legs[2].Draw(renderer);
+
+	//dir = (points_r[idx * 3] - points_r[idx * 3 + 1]).normalize();
+	//legs[3].CalculateNextStep(renderer, dir);
+	//legs[3].FABRIK();
+	//legs[3].Draw(renderer);
+	}
+}
+
 // returns points on the left and right side of the particle
 std::pair<Vec2, Vec2> Worm::GenerateSidesPoints(const Vec2& center, float radius, float angle)
 {
@@ -188,12 +251,7 @@ std::vector<Vec2> Worm::GenerateRoundedLines(const Vec2& center, float radius, f
 	return points;
 }
 
-float normalize_angle(float angle) 
-{
-	while (angle < 0) angle += 2 * M_PI;
-	while (angle >= 2 * M_PI) angle -= 2 * M_PI;
-	return angle;
-}
+
 
 void Worm::DrawBody(SDL_Renderer* renderer)
 {
@@ -223,16 +281,76 @@ void Worm::DrawBody(SDL_Renderer* renderer)
 		DrawFace(renderer);
 	if (hasEyes)
 		DrawEyes(renderer);
+
+	/// Legs
+	MoveLegs(renderer);
+	DrawLegs(renderer);
 }
+
+void Worm::DrawLegs(SDL_Renderer* renderer)
+{
+	float radius = 10.f;
+	SDL_SetRenderDrawColor(renderer, legsColor.r, legsColor.g, legsColor.b, legsColor.a);
+	for (int i = 0; i < numLegs; ++i)
+	{
+		const Leg& leg = legs[i];
+
+		Vec2 direction;
+
+		if (i < numLegs - 1)
+		{
+			direction = legs[i + 1].foot - leg.foot;
+		}
+		else if(numLegs > 1)
+		{
+			direction = leg.foot - legs[i - 1].foot;
+		}
+
+		float theta = atan2f(direction.y, direction.x);
+
+		// hip
+		std::pair<Vec2, Vec2> hips = GenerateSidesPoints(leg.hip, radius, theta);
+		// knee
+		std::pair<Vec2, Vec2> knees = GenerateSidesPoints(leg.knee, radius, theta);
+		// foot
+		std::pair<Vec2, Vec2> foots = GenerateSidesPoints(leg.foot, radius, theta);
+
+		std::vector<Vec2> points_l = { hips.first, knees.first, foots.first };
+		std::vector<Vec2> points_r = { hips.second, knees.second, foots.second };
+
+		// line from left points
+		std::vector<SDL_Point> sdl_points_left = Vec2ToSDLPoints(points_l);
+		SDL_RenderDrawLines(renderer, &sdl_points_left[0], sdl_points_left.size());
+
+		// line from right points
+		std::vector<SDL_Point> sdl_points_right = Vec2ToSDLPoints(points_r);
+		SDL_RenderDrawLines(renderer, &sdl_points_right[0], sdl_points_right.size());
+
+
+		/// Rounded Ends
+		std::vector<Vec2> leg_end;
+		// idk why the last leg has to be inverted :/
+		if (numLegs > 1 && i == numLegs-1)
+		{
+			leg_end = GenerateRoundedLines(leg.foot, radius, theta, M_PI, -1);
+		}
+		else
+		{
+			leg_end = GenerateRoundedLines(leg.foot, radius, theta);
+		}
+		std::vector<SDL_Point> leg_end_points = Vec2ToSDLPoints(leg_end);
+		SDL_RenderDrawLines(renderer, &leg_end_points[0], leg_end_points.size());
+	}
+}
+
 
 void Worm::DrawEyes(SDL_Renderer* renderer)
 {
 	const Vec2& headPos = particles[0].pos;
 	float r = particles[0].radius;
 
-	// @TODO: do i need to normalize the angle?
-	float leftAngle = normalize_angle(thetas[0] + M_PI / 2);
-	float rightAngle = normalize_angle(thetas[0] - M_PI / 2);
+	float leftAngle = thetas[0] + M_PI / 2;
+	float rightAngle = thetas[0] - M_PI / 2;
 
 	float leftX = headPos.x - r * cosf(leftAngle);
 	float leftY = headPos.y - r * sinf(leftAngle);
@@ -245,8 +363,8 @@ void Worm::DrawEyes(SDL_Renderer* renderer)
 
 	DrawPoint(renderer, eyes.first);
 	DrawPoint(renderer, eyes.second);
-	DrawPoint(renderer, { rightX, rightY }, { 255, 255, 255, 255 });
-	DrawPoint(renderer, { leftX, leftY }, { 255, 255, 255, 255 });
+	//DrawPoint(renderer, { rightX, rightY }, { 255, 255, 255, 255 });
+	//DrawPoint(renderer, { leftX, leftY }, { 255, 255, 255, 255 });
 }
 
 void Worm::DrawFace(SDL_Renderer* renderer)
@@ -288,11 +406,21 @@ void Worm::DrawFace(SDL_Renderer* renderer)
 
 void Worm::DrawDebugBody(SDL_Renderer* renderer)
 {
+	GenerateBodyPoints();
+	MoveLegs(renderer);
 	for (const Particle& p : particles)
 	{
 		DrawDebugParticle(renderer, p.pos, p.radius, p.color.SDLColor());
 	}
+
+	DrawDebugSidePoints(renderer);
+
+	for (const Leg& leg : legs)
+	{
+		leg.Draw(renderer);
+	}
 }
+
 
 // Debug points for sides of the worm
 void Worm::DrawDebugSidePoints(SDL_Renderer* renderer)
@@ -364,3 +492,5 @@ void Worm::MoveToRandom(const float dt)
 		head.pos += head.vel;
 	}
 }
+
+

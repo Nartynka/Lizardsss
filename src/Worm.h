@@ -4,6 +4,7 @@
 #include "Vec2.h"
 #include "Utils.h"
 #include "MyUI.h"
+#include "Leg.h"
 
 struct Particle
 {
@@ -27,7 +28,7 @@ struct ElasticDistance
 
 struct Worm
 {
-	int numParticles = 128;
+	int numParticles = 72;
 	std::vector<Particle> particles;
 
 	int numConstrains = numParticles - 1;
@@ -35,12 +36,17 @@ struct Worm
 
 	SDL_Color outlineColor = { 255, 255, 255, 255 };
 	SDL_Color faceColor = { 255, 255, 255, 255 };
+	SDL_Color legsColor = { 230, 230, 230, 255 };
 
 	WormOptions::Face faceType;
 	WormOptions::Eyes eyesType;
 
 	bool hasEyes = true;
 	bool hasFace = true;
+
+	int numLegs = 4;
+	std::vector<Leg> legs;
+
 private:
 	std::vector<Vec2> moveToPoints;
 	const float speed = 120.f;
@@ -54,6 +60,7 @@ private:
 	std::vector<float> thetas;
 
 	void GenerateBodyPoints();
+	void MoveLegs(SDL_Renderer* renderer);
 	std::pair<Vec2, Vec2> GenerateSidesPoints(const Vec2& center, float radius, float angle);
 	std::vector<Vec2> GenerateRoundedLines(const Vec2& center, float radius, float startAngle, float endAngle = M_PI, int direction = 1);
 
@@ -61,6 +68,7 @@ private:
 
 	void DrawEyes(SDL_Renderer* renderer);
 	void DrawFace(SDL_Renderer* renderer);
+	void DrawLegs(SDL_Renderer* renderer);
 public:
 	Worm(SDL_Renderer* renderer);
 	Worm(SDL_Renderer* renderer, WormOptions::Options options);
@@ -78,4 +86,5 @@ public:
 	void MoveTowards(const double dt);
 
 	void MoveToRandom(const float dt);
+
 };

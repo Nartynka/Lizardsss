@@ -48,6 +48,9 @@
     <ClInclude Include="src\WormOptions.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\Leg.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Main.cpp">
@@ -82,6 +85,9 @@
     </ClCompile>
     <ClCompile Include="ThirdParty\imgui\backends\imgui_impl_sdlrenderer2.cpp">
       <Filter>ThirdParty\backends</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Leg.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

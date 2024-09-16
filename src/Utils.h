@@ -66,16 +66,30 @@ inline void DrawCircle(SDL_Renderer* renderer, Vec2 center, int radius, SDL_Colo
 			error += dx - (radius << 1);
 		}
 	}
+
+	//std::vector<SDL_FPoint> vertices;
+	//float r = 100;
+	//for (float i = 0; i < M_PI * 2; i += 0.01)
+	//{
+	//	//float r = radius + rand() % 20 - 10;
+	//	// polar to Cartesian cords
+	//	float x = cos(i) * r + 200;
+	//	float y = sin(i) * r + 200;
+	//	vertices.push_back({ x, y });
+	//}
+
+	//SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+	//SDL_RenderDrawPointsF(renderer, &vertices[0], vertices.size());
 }
 
 inline float Rad2Deg(float radians)
 {
-	return radians * 180 / M_PI;
+	return (float)(radians * 180 / M_PI);
 }
 
 inline float Deg2Rad(float degrees)
 {
-	return degrees * M_PI / 180;
+	return (float)(degrees * M_PI / 180);
 }
 
 inline void DrawPoint(SDL_Renderer* renderer, const Vec2& center, SDL_Color color)
@@ -99,9 +113,10 @@ inline Point CreatePoint(SDL_Renderer* renderer, const Vec2& center)
 	return p;
 }
 
-inline void DrawLine(SDL_Renderer* renderer, const Vec2& start, const Vec2& end)
+inline void DrawLine(SDL_Renderer* renderer, const Vec2& start, const Vec2& end, SDL_Color color = {255, 255, 255, 255})
 {
-	SDL_RenderDrawLine(renderer, start.x, start.y, end.x, end.y);
+	SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
+	SDL_RenderDrawLine(renderer, (int)start.x, (int)start.y, (int)end.x, (int)end.y);
 }
 
 inline void DrawDebugParticle(SDL_Renderer* renderer, const Vec2& center, float radius, SDL_Color color)

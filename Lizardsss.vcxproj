@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Leg.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\MyUI.cpp" />
     <ClCompile Include="src\Utils.h" />
@@ -32,6 +33,7 @@
     <ClCompile Include="ThirdParty\imgui\imgui_widgets.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Leg.h" />
     <ClInclude Include="src\MyUI.h" />
     <ClInclude Include="src\Vec2.h" />
     <ClInclude Include="src\Worm.h" />

@@ -43,6 +43,7 @@ struct Worm
 
 	bool hasEyes = true;
 	bool hasFace = true;
+	bool hasLegs = true;
 
 	int numLegs = 4;
 	std::vector<Leg> legs;

@@ -17,6 +17,10 @@ const int SCREEN_HEIGHT = 720;
 // if should draw actual body if in debug
 #define DRAW_BODY_DEBUG false
 
+
+// if should create worm that follows the cursor
+#define PLAYER_WORM false
+
 int main(int argc, char* args[])
 {
 	int result = SDL_Init(SDL_INIT_VIDEO);
@@ -34,7 +38,7 @@ int main(int argc, char* args[])
 
 	Worm playerWorm(renderer);
 
-	std::vector<std::shared_ptr<Worm>> worms;
+	std::vector<std::unique_ptr<Worm>> worms;
 
 	const float fixedDeltaTime = 1.f / 60.f; // 60 FPS
 	float lastTime = 0.f;
@@ -72,7 +76,7 @@ int main(int argc, char* args[])
 
 			WormOptions::Options options;
 
-			//MyUI::DrawMenu(&options, [renderer, &options, &worms]() {auto newWorm = std::make_shared<Worm>(renderer, options); worms.emplace_back(newWorm); });
+			MyUI::DrawMenu(&options, [renderer, &options, &worms]() {worms.emplace_back(std::make_unique<Worm>(renderer, options)); });
 
 			// only for preview
 			//{
@@ -84,16 +88,12 @@ int main(int argc, char* args[])
 			//	playerWorm.eyesType = options.eyesType;
 			//}
 
+#if PLAYER_WORM
 			int mouseX, mouseY;
 			SDL_GetMouseState(&mouseX, &mouseY);
 			Vec2 mousePos = { mouseX, mouseY };
 
 			playerWorm.particles[0].pos = mousePos;
-
-			//arm.anchor = mousePos;
-			//arm.FABRIK();
-			//arm.CalculateNextStep(renderer);
-			//arm.Draw(renderer);
 
 			playerWorm.ResolveConstrains();
 #if !WORM_DEBUG || DRAW_BODY_DEBUG
@@ -103,6 +103,8 @@ int main(int argc, char* args[])
 #if WORM_DEBUG
 			playerWorm.DrawDebugBody(renderer);
 #endif
+#endif
+
 			for (const auto& w : worms)
 			{
 				w->ResolveConstrains();

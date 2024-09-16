@@ -24,12 +24,15 @@ namespace WormOptions
 	{
 		SDL_Color outlineColor = { 0 };
 		SDL_Color faceColor = { 0 };
+		SDL_Color legsColor = { 0 };
 
 		bool hasEyes = false;
 		Eyes eyesType = Eyes::Default;
 
 		bool hasFace = false;
 		Face faceType = Face::Smile;
+
+		bool hasLegs = false;
 
 		int radius = 30;
 		int numParticles = 64;

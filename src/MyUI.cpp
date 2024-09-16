@@ -44,9 +44,11 @@ void MyUI::DrawMenu(WormOptions::Options* outOptions, std::function<void()> call
 {
 	static ImVec4 outlineColor = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
 	static ImVec4 faceColor = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
+	static ImVec4 legsColor = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
 
 	static bool eyes = false;
 	static bool face = false;
+	static bool legs = false;
 
 	ImGui::Begin("Create a Worm!", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
 	ImGui::SeparatorText("Appearance");
@@ -108,6 +110,17 @@ void MyUI::DrawMenu(WormOptions::Options* outOptions, std::function<void()> call
 
 	}
 
+	ImGui::Checkbox("Legs", &legs);
+	if (legs)
+	{
+		ImGui::Text("Legs Color:");
+		ImGui::SameLine();
+		ImGui::ColorEdit3("Legs Color", (float*)&legsColor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_NoDragDrop);
+	}
+
+
+
+
 	ImGui::SeparatorText("Size");
 	static bool autoDistance = outOptions->hasAutoDistance;
 	static float distance = outOptions->distance;
@@ -133,8 +146,10 @@ void MyUI::DrawMenu(WormOptions::Options* outOptions, std::function<void()> call
 
 	outOptions->hasEyes = eyes;
 	outOptions->hasFace = face;
+	outOptions->hasLegs = legs;
 	outOptions->outlineColor = { (Uint8)(outlineColor.x * 255.0f), (Uint8)(outlineColor.y * 255.0f), (Uint8)(outlineColor.z * 255.0f), 255 };
 	outOptions->faceColor = { (Uint8)(faceColor.x * 255.0f), (Uint8)(faceColor.y * 255.0f), (Uint8)(faceColor.z * 255.0f), 255 };
+	outOptions->legsColor = { (Uint8)(legsColor.x * 255.0f), (Uint8)(legsColor.y * 255.0f), (Uint8)(legsColor.z * 255.0f), 255 };
 	if (face && face_current_idx > -1)
 		outOptions->faceType = outOptions->MatchFaceStringToEnum(face_types[face_current_idx]);
 	if (eyes && eyes_current_idx > -1)

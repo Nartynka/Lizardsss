@@ -57,10 +57,12 @@ Worm::Worm(SDL_Renderer* renderer, WormOptions::Options options)
 	numConstrains = numParticles - 1;
 	outlineColor = options.outlineColor;
 	faceColor = options.faceColor;
+	legsColor = options.legsColor;
 	faceType = options.faceType;
 	eyesType = options.eyesType;
 	hasFace = options.hasFace;
 	hasEyes = options.hasEyes;
+	hasLegs = options.hasLegs;
 
 	for (int i = 0; i < numParticles; ++i)
 	{
@@ -283,8 +285,11 @@ void Worm::DrawBody(SDL_Renderer* renderer)
 		DrawEyes(renderer);
 
 	/// Legs
-	MoveLegs(renderer);
-	DrawLegs(renderer);
+	if (hasLegs)
+	{
+		MoveLegs(renderer);
+		DrawLegs(renderer);
+	}
 }
 
 void Worm::DrawLegs(SDL_Renderer* renderer)
@@ -407,7 +412,6 @@ void Worm::DrawFace(SDL_Renderer* renderer)
 void Worm::DrawDebugBody(SDL_Renderer* renderer)
 {
 	GenerateBodyPoints();
-	MoveLegs(renderer);
 	for (const Particle& p : particles)
 	{
 		DrawDebugParticle(renderer, p.pos, p.radius, p.color.SDLColor());
@@ -415,9 +419,13 @@ void Worm::DrawDebugBody(SDL_Renderer* renderer)
 
 	DrawDebugSidePoints(renderer);
 
-	for (const Leg& leg : legs)
+	if (hasLegs)
 	{
-		leg.Draw(renderer);
+		MoveLegs(renderer);
+		for (const Leg& leg : legs)
+		{
+			leg.Draw(renderer);
+		}
 	}
 }
 
@@ -477,13 +485,10 @@ void Worm::MoveToRandom(const float dt)
 
 	if (distance <= 2.f || target == Vec2(0.f, 0.f))
 	{
-		Vec2 prevTarget = target;
-		target = { RandomInRange(-10, 1090), RandomInRange(-10, 730) };
-
-		while (abs(target.x - prevTarget.x) < 100.f || abs(target.y - prevTarget.y) < 100.f)
+		do 
 		{
 			target = { RandomInRange(-10, 1090), RandomInRange(-10, 730) };
-		}
+		} while (length(target - head.pos) < 200);
 	}
 	else 
 	{

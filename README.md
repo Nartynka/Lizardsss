@@ -2,9 +2,8 @@
 - **Everything done with math**
 - **FABRIK legs**
 - **Dear ImGui UI**
-  
 
-https://github.com/user-attachments/assets/60a4c460-a89c-4349-a013-5e9c600f8c79
+https://github.com/user-attachments/assets/0187378e-fe59-4019-8332-3d8971a1620d
 
 ![One Worm](https://github.com/user-attachments/assets/429db159-bbd7-4a46-8b0f-310817fd2200)
 ![Worms](https://github.com/user-attachments/assets/b08ac2cf-6da5-4998-bcfe-5bc07ed0ddb1)

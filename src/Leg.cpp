@@ -4,6 +4,12 @@
 
 #define FABRIK_DEBUG false
 
+Leg::Leg()
+{
+	stepLenght = (shinLenght + thighLenght) / 2;
+}
+
+
 void Leg::SetAnchor(const Vec2& newAnchor)
 {
 	anchor = newAnchor;
@@ -22,7 +28,6 @@ void Leg::FABRIK()
 	}
 
 	//hip = knee + (hip - knee).normalize() * shinLenght;
-	
 	//Vec2 diff = knee - hip;
 	//float th = atan2f(diff.y, diff.x);
 	//if (i == 2)
@@ -41,7 +46,7 @@ void Leg::FABRIK()
 	//knee = { x, y };
 }
 
-void Leg::Draw(SDL_Renderer* renderer) const
+void Leg::DrawDebug(SDL_Renderer* renderer) const
 {
 	// target circle
 	//DrawCircle(renderer, anchor, 10.f, { 255, 255, 0, 255 });
@@ -84,7 +89,7 @@ void Leg::CalculateNextStep(SDL_Renderer* renderer, Vec2 dir, bool isRightSide)
 
 	Vec2 nextStep = { targetX, targetY };
 
-#if DEBUG
+#if FABRIK_DEBUG
 	// Yellow forward vector from foot
 	DrawLine(renderer, foot, foot + (dir * 50), { 255, 255, 0, 255});
 	DrawCircle(renderer, nextStep, 10, { 255, 0, 255, 255 });

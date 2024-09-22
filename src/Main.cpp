@@ -13,13 +13,13 @@
 const int SCREEN_WIDTH = 1280;
 const int SCREEN_HEIGHT = 720;
 
-#define WORM_DEBUG false
-// if should draw actual body if in debug
-#define DRAW_BODY_DEBUG false
-
-
 // if should create worm that follows the cursor
-#define PLAYER_WORM false
+#define PLAYER_WORM true
+
+// if should draw debug lines/shapes for player worm
+#define WORM_DEBUG_BODY false
+#define WORM_DEBUG_LEGS false
+
 
 int main(int argc, char* args[])
 {
@@ -96,15 +96,17 @@ int main(int argc, char* args[])
 			playerWorm.particles[0].pos = mousePos;
 
 			playerWorm.ResolveConstrains();
-#if !WORM_DEBUG || DRAW_BODY_DEBUG
-			playerWorm.DrawBody(renderer);
-#endif
-
-#if WORM_DEBUG
+	#if WORM_DEBUG_BODY
 			playerWorm.DrawDebugBody(renderer);
+	#elif WORM_DEBUG_LEGS
+			playerWorm.DrawBody(renderer, false);
+	#else
+			playerWorm.DrawBody(renderer);
+	#endif
+	#if WORM_DEBUG_LEGS
+			playerWorm.DrawDebugLegs(renderer);
+	#endif
 #endif
-#endif
-
 			for (const auto& w : worms)
 			{
 				w->ResolveConstrains();

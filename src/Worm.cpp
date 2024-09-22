@@ -255,7 +255,7 @@ std::vector<Vec2> Worm::GenerateRoundedLines(const Vec2& center, float radius, f
 
 
 
-void Worm::DrawBody(SDL_Renderer* renderer)
+void Worm::DrawBody(SDL_Renderer* renderer, bool shouldDrawLegs)
 {
 	/// Side lines
 	GenerateBodyPoints();
@@ -285,7 +285,7 @@ void Worm::DrawBody(SDL_Renderer* renderer)
 		DrawEyes(renderer);
 
 	/// Legs
-	if (hasLegs)
+	if (hasLegs && shouldDrawLegs)
 	{
 		MoveLegs(renderer);
 		DrawLegs(renderer);
@@ -347,7 +347,6 @@ void Worm::DrawLegs(SDL_Renderer* renderer)
 		SDL_RenderDrawLines(renderer, &leg_end_points[0], leg_end_points.size());
 	}
 }
-
 
 void Worm::DrawEyes(SDL_Renderer* renderer)
 {
@@ -418,13 +417,17 @@ void Worm::DrawDebugBody(SDL_Renderer* renderer)
 	}
 
 	DrawDebugSidePoints(renderer);
+}
 
+
+void Worm::DrawDebugLegs(SDL_Renderer* renderer)
+{
 	if (hasLegs)
 	{
 		MoveLegs(renderer);
 		for (const Leg& leg : legs)
 		{
-			leg.Draw(renderer);
+			leg.DrawDebug(renderer);
 		}
 	}
 }
@@ -497,5 +500,3 @@ void Worm::MoveToRandom(const float dt)
 		head.pos += head.vel;
 	}
 }
-
-

@@ -70,6 +70,7 @@ private:
 	void DrawEyes(SDL_Renderer* renderer);
 	void DrawFace(SDL_Renderer* renderer);
 	void DrawLegs(SDL_Renderer* renderer);
+
 public:
 	Worm(SDL_Renderer* renderer);
 	Worm(SDL_Renderer* renderer, WormOptions::Options options);
@@ -78,9 +79,10 @@ public:
 
 	void ResolveConstrains();
 
-	void DrawBody(SDL_Renderer* renderer);
+	void DrawBody(SDL_Renderer* renderer, bool shouldDrawLegs=true);
 
 	void DrawDebugBody(SDL_Renderer* renderer);
+	void DrawDebugLegs(SDL_Renderer* renderer);
 	void DrawDebugSidePoints(SDL_Renderer* renderer);
 
 	void AddMoveToPoint(Vec2 pos);

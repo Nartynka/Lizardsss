@@ -17,9 +17,11 @@ const int SCREEN_HEIGHT = 720;
 #define PLAYER_WORM true
 
 // if should draw debug lines/shapes for player worm
-#define WORM_DEBUG_BODY false
-#define WORM_DEBUG_LEGS false
+//#define WORM_DEBUG_BODY false
+//#define WORM_DEBUG_LEGS false
 
+bool bWormDebugBody = false;
+bool bWormDebugLegs = false;
 
 int main(int argc, char* args[])
 {
@@ -69,6 +71,13 @@ int main(int argc, char* args[])
 				if (event.type == SDL_QUIT)
 					quit = true;
 
+				if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_SPACE)
+				{
+					bWormDebugBody = !bWormDebugBody;
+					bWormDebugLegs = !bWormDebugLegs;
+				}
+
+
 				MyUI::ProcessEvent(event);
 			}
 
@@ -96,17 +105,18 @@ int main(int argc, char* args[])
 			playerWorm.particles[0].pos = mousePos;
 
 			playerWorm.ResolveConstrains();
-	#if WORM_DEBUG_BODY
-			playerWorm.DrawDebugBody(renderer);
-	#elif WORM_DEBUG_LEGS
-			playerWorm.DrawBody(renderer, false);
-	#else
-			playerWorm.DrawBody(renderer);
-	#endif
-	#if WORM_DEBUG_LEGS
-			playerWorm.DrawDebugLegs(renderer);
-	#endif
-#endif
+
+			if (bWormDebugLegs)
+				playerWorm.DrawDebugLegs(renderer);
+
+			if (bWormDebugBody)
+				playerWorm.DrawDebugBody(renderer);
+			//else if (bWormDebugLegs)
+			//	playerWorm.DrawBody(renderer, false);
+			else
+				playerWorm.DrawBody(renderer);
+#endif // PLAYER_WORM
+
 			for (const auto& w : worms)
 			{
 				w->ResolveConstrains();

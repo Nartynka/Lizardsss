@@ -36,6 +36,7 @@ Worm::Worm(SDL_Renderer* renderer)
 	}
 
 	SDL_Surface* eye_surf = IMG_Load("res/dotw.png");
+	assert(eye_surf != nullptr && "Could not load eye surface!");
 	SDL_Texture* eye_text = SDL_CreateTextureFromSurface(renderer, eye_surf);
 	eyes.first = { eye_text, {0}, {eye_surf->h / 2, eye_surf->w / 2} };
 	eyes.second = { eye_text, {0}, { eye_surf->h / 2, eye_surf->w / 2} };
@@ -100,6 +101,7 @@ Worm::Worm(SDL_Renderer* renderer, WormOptions::Options options)
 	}
 
 	SDL_Surface* eye_surf = IMG_Load(options.GetEyesPath(eyesType));
+	assert(eye_surf != nullptr && "Could not load eye surface!");
 	SDL_Texture* eye_text = SDL_CreateTextureFromSurface(renderer, eye_surf);
 	eyes.first = { eye_text, {0}, { eye_surf->h / 2, eye_surf->w / 2} };
 	eyes.second = { eye_text, {0}, { eye_surf->h / 2, eye_surf->w / 2} };

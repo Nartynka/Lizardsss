@@ -119,8 +119,6 @@ void MyUI::DrawMenu(WormOptions::Options* outOptions, std::function<void()> call
 	}
 
 
-
-
 	ImGui::SeparatorText("Size");
 	static bool autoDistance = outOptions->hasAutoDistance;
 	static float distance = outOptions->distance;

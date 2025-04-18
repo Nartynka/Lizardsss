@@ -56,7 +56,7 @@ namespace WormOptions
 		{
 			for (int i = 0; i < NumFaces; ++i)
 			{
-				if (FaceStrings[i] == string)
+				if (strcmp(FaceStrings[i], string) == 0)
 				{
 					return Face(i);
 				}
@@ -67,7 +67,7 @@ namespace WormOptions
 		{
 			for (int i = 0; i < NumEyes; ++i)
 			{
-				if (EyesStrings[i] == string)
+				if (strcmp(EyesStrings[i], string) == 0)
 				{
 					return Eyes(i);
 				}

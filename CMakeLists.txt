@@ -2,36 +2,54 @@ cmake_minimum_required(VERSION 3.10)
 
 project(Lizardsss)
 
-# use C++11 standard
 set(CMAKE_CXX_STANDARD 11)
 
-# suppress generating ZERO_CHECK project
 set(CMAKE_SUPPRESS_REGENERATION true)
 
-# add source files
-file(GLOB_RECURSE SOURCE_FILES
-${CMAKE_SOURCE_DIR}/src/*.cpp
-${CMAKE_SOURCE_DIR}/ThirdParty/imgui/*.cpp)
+set(SDL_INCLUDE_PATH ${CMAKE_SOURCE_DIR}/ThirdParty/SDL2/include)
+set(SDL_LIBRARY ${CMAKE_SOURCE_DIR}/ThirdParty/SDL2/lib/x64/SDL2.lib)
+set(SDL_MAIN_LIBRARY ${CMAKE_SOURCE_DIR}/ThirdParty/SDL2/lib/x64/SDL2main.lib)
 
-# add header files
-file(GLOB_RECURSE HEADER_FILES
+set(SDL_IMAGE_INCLUDE_PATH ${CMAKE_SOURCE_DIR}/ThirdParty/SDL2_image/include)
+set(SDL_IMAGE_LIBRARY ${CMAKE_SOURCE_DIR}/ThirdParty/SDL2_image/lib/x64/SDL2_image.lib)
+
+set(SDL_TTF_INCLUDE_PATH ${CMAKE_SOURCE_DIR}/ThirdParty/SDL2_ttf/include)
+set(SDL_TTF_LIBRARY ${CMAKE_SOURCE_DIR}/ThirdParty/SDL2_ttf/lib/x64/SDL2_ttf.lib)
+
+set(IMGUI_INCLUDE_PATH ${CMAKE_SOURCE_DIR}/ThirdParty/imgui)
+
+
+file(GLOB_RECURSE IMGUI_FILES
 	${CMAKE_SOURCE_DIR}/ThirdParty/imgui/*.h
-	${CMAKE_SOURCE_DIR}/src/*.h)
-
-include_directories(${CMAKE_SOURCE_DIR}/ThirdParty/imgui
-	${CMAKE_SOURCE_DIR}/ThirdParty/SDL2/include
-	${CMAKE_SOURCE_DIR}/ThirdParty/SDL2_image/include
-	${CMAKE_SOURCE_DIR}/ThirdParty/SDL2_ttf/include
+	${CMAKE_SOURCE_DIR}/ThirdParty/imgui/*.cpp
 )
 
-add_executable(${PROJECT_NAME} ${HEADER_FILES} ${SOURCE_FILES})
+file(GLOB_RECURSE HEADER_FILES
+	${CMAKE_SOURCE_DIR}/src/*.h
+)
+
+file(GLOB_RECURSE SOURCE_FILES
+	${CMAKE_SOURCE_DIR}/src/*.cpp
+)
+
+source_group("imgui" FILES ${IMGUI_FILES})
 
 
-target_link_libraries(${PROJECT_NAME} 
-	${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/SDL2/lib/x64/SDL2.lib
-	${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/SDL2/lib/x64/SDL2main.lib
-	${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/SDL2_image/lib/x64/SDL2_image.lib
-	${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/SDL2_ttf/lib/x64/SDL2_ttf.lib
+include_directories(
+	${SDL_INCLUDE_PATH}
+	${SDL_IMAGE_INCLUDE_PATH}
+	${SDL_TTF_INCLUDE_PATH}
+	${IMGUI_INCLUDE_PATH}
+)
+
+add_executable(${PROJECT_NAME} ${HEADER_FILES} ${SOURCE_FILES} ${IMGUI_FILES})
+
+
+target_link_libraries(${PROJECT_NAME}
+	${SDL_LIBRARY}
+	${SDL_MAIN_LIBRARY}
+	${SDL_IMAGE_LIBRARY}
+	${SDL_TTF_LIBRARY}
 )
 
 
